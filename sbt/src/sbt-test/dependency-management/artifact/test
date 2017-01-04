@@ -17,3 +17,6 @@ $ touch retrieve
 
 # verify that artifact with extension, type, and classifier can be retreieved
 > check
+
+# verify that filterArtifact finds the main artifact
+> checkMatch

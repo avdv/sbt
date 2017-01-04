@@ -2,6 +2,7 @@ import sbt.classpath.ClasspathUtilities
 
 lazy val checkFull = taskKey[Unit]("")
 lazy val check = taskKey[Unit]("")
+lazy val checkMatch = taskKey[Unit]("")
 
 lazy val root = (project in file(".")).
   settings(
@@ -17,7 +18,8 @@ lazy val root = (project in file(".")).
     unmanagedClasspath in Compile += scalaInstance.map(_.libraryJar).value,
     classpathTypes := Set(tpe),
     check := checkTask(dependencyClasspath).value,
-    checkFull := checkTask(fullClasspath).value
+    checkFull := checkTask(fullClasspath).value,
+    checkMatch := checkFilter.value
   )
 
 // define strings for defining the artifact
@@ -39,4 +41,8 @@ def checkTask(classpath: TaskKey[Classpath]) = (classpath in Compile, scalaInsta
   val loader = ClasspathUtilities.toLoader(cp.files, si.loader)
   try { Class.forName("test.Test", false, loader); () }
   catch { case _: ClassNotFoundException | _: NoClassDefFoundError => sys.error("Dependency not retrieved properly") }
+}
+
+def checkFilter() = (update) map { (updateReport) =>
+  if (updateReport.matching((_: Artifact) == mainArtifact).isEmpty) sys.error("main Artifact not found")
 }
